@@ -280,7 +280,7 @@ client.once('ready', async () => {
     }
   }
 });
-const kaguyaCommands = new Set(['balance','daily','work','fish','economy-add','admin-abuse','pay','deposit','withdraw','leaderboard','level','fish-setup','fishinventory','fishalmanac','give','gamble','rob','fishprofile','fishleaderboard','fishshop','fishrod','fishstatuseffects','fishdrink','fishmarket','fishaquarium','fishbattle','fishbattlepvp','tod-setup','tod-panel']);
+const kaguyaCommands = new Set(['balance','daily','work','fish','economy-add','admin-abuse','pay','deposit','withdraw','leaderboard','level','fish-setup','fishinventory','fishalmanac','give','gamble','rob','fishprofile','fishleaderboard','fishshop','fishrod','fishstatuseffects','fishdrink','fishmarket','fishaquarium','fishbattle','fishbattlepvp']);
 const registeredCommands = commands.filter(command => kaguyaCommands.has(command.name));
 const configuredGuildIds = (process.env.DISCORD_GUILD_ID || '').split(',').map(id => id.trim()).filter(Boolean);
 client.on('voiceStateUpdate', async (oldState, newState) => {
@@ -969,6 +969,14 @@ client.on('interactionCreate', async interaction => {
 });
 client.on('messageCreate', async message => {
   if (!message.guild) return;
+  // Kaguya is the economy and fishing app. Server moderation, panels, tickets,
+  // brain replies, auto-reacts, and other message features belong to Yachiyo.
+  if (message.author.bot) return;
+  await addChatXp(message.guild.id,message.author.id).catch(console.error);
+  await addMoney(message.author.id,1,'chat_message').catch(console.error);
+  return;
+  /* Disabled Kaguya message features are intentionally left below for source
+     compatibility while Yachiyo owns them at runtime. */
   const interactionName = message.interactionMetadata?.name ?? message.interaction?.commandName;
   if (interactionName === 'bump') {
     const userId = message.interactionMetadata?.user?.id ?? message.interaction?.user?.id ?? (!message.author.bot ? message.author.id : null);
