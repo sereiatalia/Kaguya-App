@@ -288,6 +288,9 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
     if (!oldState.channelId && newState.channelId) await startVoiceActivity(newState.guild.id,newState.id).catch(console.error);
     if (oldState.channelId && !newState.channelId) await stopVoiceActivity(newState.guild.id,newState.id).catch(console.error);
   }
+  // Temporary voice rooms belong exclusively to Yachiyo-App. Kaguya must not
+  // read old temp-voice settings or create rooms when members join a trigger VC.
+  return;
   for (const channelId of new Set([oldState.channelId, newState.channelId].filter(Boolean))) {
     const record = await getTempVoiceChannel(channelId).catch(() => null);
     if (!record) continue;
