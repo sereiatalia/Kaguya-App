@@ -512,9 +512,12 @@ async function refreshIntroductionPanel(guildId) {
   await setIntroductionPanelMessage(guildId, panel.id);
 }
 client.on('guildCreate', guild => ensureGuild(guild.id).catch(console.error));
-client.on('guildMemberAdd', m => sendAuditLog(client,m.guild,{eventType:'member.join',targetId:m.id,data:{summary:`${m.user.tag} joined the server.`}}).catch(console.error));
-client.on('guildMemberRemove', m => sendAuditLog(client,m.guild,{eventType:'member.leave',targetId:m.id,data:{summary:`${m.user.tag} left the server.`}}).catch(console.error));
+// Kaguya is economy/fishing only. Yachiyo exclusively owns moderation logs,
+// panel refreshes, tickets, reactions, and other server-management listeners.
+client.on('guildMemberAdd', () => {});
+client.on('guildMemberRemove', () => {});
 client.on('messageDelete', async msg => {
+  return;
   if (filteredMessageIds.delete(msg.id)) return;
   if (!msg.guild) return;
   const intro = await getIntroductionByMessageId(msg.guild.id, msg.id).catch(() => null);
@@ -531,16 +534,17 @@ client.on('messageDelete', async msg => {
   sendAuditLog(client, msg.guild, { eventType:'message.delete', actorId:msg.author.id, targetId:msg.channelId, data:{ channelName:msg.channel?.name, messageId:msg.id, authorId:msg.author.id, createdTimestamp:msg.createdTimestamp, content:msg.content, attachments:msg.attachments?.size, attachmentUrls:[...msg.attachments.values()].map(a => a.url), attachmentDetails:[...msg.attachments.values()].map(a => ({name:a.name,url:a.url,contentType:a.contentType})), summary:'A message was deleted.' } }).catch(console.error);
 });
 client.on('messageUpdate', async (oldMsg, newMsg) => {
+  return;
   if (!newMsg.guild || (oldMsg.content === newMsg.content && oldMsg.attachments?.size === newMsg.attachments?.size)) return;
   const message = newMsg.partial ? await newMsg.fetch().catch(() => newMsg) : newMsg;
   const author = message.author;
   if (!author || author.bot || author.id === client.user?.id) return;
   sendAuditLog(client, message.guild, { eventType:'message.edit', actorId:author.id, targetId:message.channelId, data:{ channelName:message.channel?.name, messageId:message.id, authorId:author.id, createdTimestamp:message.createdTimestamp, before:oldMsg.content, after:message.content, attachmentUrls:[...message.attachments.values()].map(a => a.url), previousAttachmentUrls:[...(oldMsg.attachments?.values?.() ?? [])].map(a => a.url), summary:'A message was edited.' } }).catch(console.error);
 });
-client.on('roleCreate', role => sendAuditLog(client,role.guild,{eventType:'role.create',targetId:role.id,data:{summary:`Role **${role.name}** was created.`}}).catch(console.error));
-client.on('roleDelete', role => sendAuditLog(client,role.guild,{eventType:'role.delete',targetId:role.id,data:{summary:`Role **${role.name}** was deleted.`}}).catch(console.error));
-client.on('channelCreate', channel => { if(channel.guild) sendAuditLog(client,channel.guild,{eventType:'channel.create',targetId:channel.id,data:{summary:`Channel **${channel.name}** was created.`}}).catch(console.error); });
-client.on('channelDelete', channel => { if(channel.guild) sendAuditLog(client,channel.guild,{eventType:'channel.delete',targetId:channel.id,data:{summary:`Channel **${channel.name}** was deleted.`}}).catch(console.error); });
+client.on('roleCreate', () => {});
+client.on('roleDelete', () => {});
+client.on('channelCreate', () => {});
+client.on('channelDelete', () => {});
 client.on('reactionRoleWizardStart', interaction => runReactionRoleWizard(interaction).catch(error => console.error('[REACTION_ROLE_WIZARD]', error)));
 client.on('interactionCreate', async interaction => {
   if (interaction.guildId && interaction.isChatInputCommand()) await scheduleRobloxPanelRefresh(interaction.guildId, interaction.channelId);
