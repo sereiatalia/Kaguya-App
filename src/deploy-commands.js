@@ -7,7 +7,8 @@ const applicationId = process.env.DISCORD_CLIENT_ID;
 const guildId = process.env.DISCORD_GUILD_ID;
 const guildIds = (guildId || '').split(',').map(id => id.trim()).filter(Boolean);
 const deployGlobally = process.env.DEPLOY_GLOBAL === 'true' || !guildId;
-const registeredCommands = commands;
+const kaguyaCommands = new Set(['balance','daily','work','fish','economy-add','admin-abuse','pay','deposit','withdraw','leaderboard','level','fish-setup','fishinventory','fishalmanac','give','gamble','rob','fishprofile','fishleaderboard','fishshop','fishrod','fishstatuseffects','fishdrink','fishmarket','fishaquarium','fishbattle','fishbattlepvp','tod-setup','tod-panel']);
+const registeredCommands = commands.filter(command => kaguyaCommands.has(command.name));
 
 if (deployGlobally) {
   await rest.put(Routes.applicationCommands(applicationId), { body: registeredCommands });

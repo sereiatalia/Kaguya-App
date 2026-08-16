@@ -280,7 +280,8 @@ client.once('ready', async () => {
     }
   }
 });
-const registeredCommands = commands;
+const kaguyaCommands = new Set(['balance','daily','work','fish','economy-add','admin-abuse','pay','deposit','withdraw','leaderboard','level','fish-setup','fishinventory','fishalmanac','give','gamble','rob','fishprofile','fishleaderboard','fishshop','fishrod','fishstatuseffects','fishdrink','fishmarket','fishaquarium','fishbattle','fishbattlepvp','tod-setup','tod-panel']);
+const registeredCommands = commands.filter(command => kaguyaCommands.has(command.name));
 const configuredGuildIds = (process.env.DISCORD_GUILD_ID || '').split(',').map(id => id.trim()).filter(Boolean);
 client.on('voiceStateUpdate', async (oldState, newState) => {
   if (!newState.member?.user.bot) {
