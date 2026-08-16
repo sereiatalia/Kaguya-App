@@ -272,7 +272,6 @@ client.once('ready', async () => {
     console.error('[COMMAND_DEPLOY]', error?.rawError ? JSON.stringify(error.rawError, null, 2) : (error?.stack || error));
   }
   console.log(`Yachiyo is online as ${client.user.tag}`);
-  for (const voice of await getVoiceChannels().catch(() => [])) keepVoiceConnection(voice.guild_id, voice.voice_channel_id).catch(console.error);
   for (const reminder of await pendingBumpReminders().catch(() => [])) scheduleBumpReminder(reminder.guild_id,reminder.user_id,reminder.remind_at);
   for (const guild of client.guilds.cache.values()) {
     for (const state of guild.voiceStates.cache.values()) {
@@ -314,7 +313,8 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
   const voice = voiceConnections.get(newState.guild.id);
   if (voice) setTimeout(() => keepVoiceConnection(newState.guild.id, voice.joinConfig.channelId).catch(console.error), 2000);
 });
-client.on('voiceJoinRequest', (guildId, channelId) => keepVoiceConnection(guildId, channelId).catch(console.error));
+// Voice connections belong exclusively to Yachiyo-App.
+client.on('voiceJoinRequest', () => {});
 client.on('giveawayEnd', async giveawayId => {
   const giveaway = await getGiveaway(giveawayId).catch(() => null);
   if (!giveaway || giveaway.status !== 'active' || !giveaway.emoji) return;
