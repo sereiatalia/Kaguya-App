@@ -9,17 +9,15 @@ import { createFishCard } from '../../visuals/fish-card-renderer.js';
 import { runPullSequence } from '../../services/fishingPresentation.js';
 
 export async function handleFishCommand(interaction) {
-  const fishChannel = await getFishChannel(interaction.guildId);
-  if (fishChannel && interaction.channelId !== fishChannel) {
-    return interaction.reply({ content: '🎣 Fishing is only available in <#' + fishChannel + '>.', ephemeral: true });
-  }
-
-  const wait = await cooldownRemaining(interaction.user.id, 'fish');
-  if (wait > 0) {
-    return interaction.reply({ content: `🎣 Please wait **${Math.ceil(wait / 1000)} second(s)** before fishing again.`, ephemeral: true });
-  }
-
   try {
+    const fishChannel = await getFishChannel(interaction.guildId);
+    if (fishChannel && interaction.channelId !== fishChannel) {
+      return interaction.reply({ content: '🎣 Fishing is only available in <#' + fishChannel + '>.', ephemeral: true });
+    }
+    const wait = await cooldownRemaining(interaction.user.id, 'fish');
+    if (wait > 0) {
+      return interaction.reply({ content: `🎣 Please wait **${Math.ceil(wait / 1000)} second(s)** before fishing again.`, ephemeral: true });
+    }
     await interaction.deferReply();
     const casting = new EmbedBuilder()
       .setColor(0x4db8e8)
